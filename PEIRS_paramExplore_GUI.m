@@ -63,7 +63,7 @@ s_safe = []; s_risky = []; alpha_q = []; alpha_s = []; beta = []; omega = []; di
         else 
             distType = 2;
             lowcol = [0.58 0.99 0.56];
-            highcol = [0.19 0.94 0.15]; 
+            highcol = [0.19 0.62 0.14]; 
         end
 
         cla(ax_valueRate);
