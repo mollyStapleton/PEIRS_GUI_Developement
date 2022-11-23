@@ -109,8 +109,8 @@ inp = [];
         
         if condSel.Value == 1 % all conditions
 
-            [out1, out2, out3, out4, out_low, out_high] = simulatePEIRS_allCond(s_safe,...
-                s_risky, alpha_q, alpha_s, beta, omega, distType);
+            [Q_out, S_out, P_out] = simulatePEIRS_allCond(s_safe,s_risky, alpha_q,...
+                alpha_s, beta, omega, distType);
 
         else condSel.Value == 2
 
