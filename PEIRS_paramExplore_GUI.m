@@ -6,50 +6,84 @@ close all hidden
 
 mainFig = figure;
 mainFig.Name = 'mainWindow';
-mainFig.Position = [228.2000 43.4000 1172 394.4000];
+mainFig.Position = [185.8000 172.2000 1.3296e+03 453.6000];
 
     
 %----------------------------------------------------------------------------
 % GENERATE BASIC GRAPHICS FOR USER INPUT AND THE AXES FOR PLOTS 
 %------------------------------------------------------------------------------------
 % create axes for simulated average reward and spread to be plotted onto
-ax_valueRate = uiaxes(mainFig, 'position', [370 30 350 350]);
-ax_probRisky = uiaxes(mainFig, 'position', [770 30 350 350]);
+ax_valueRate = uiaxes(mainFig, 'position', [420 30 400 400]);
+ax_probRisky = uiaxes(mainFig, 'position', [860 30 400 400]);
 
+CondPanel      = uipanel(mainFig, 'title', 'Conditions', 'FontSize', 14,...
+    'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
+    'TitlePosition', 'centertop', 'Position', [.02 .77 .125 .2]);
+
+DistPanel       = uipanel(mainFig, 'title', 'Rewards', 'FontSize', 14,...
+    'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
+    'TitlePosition', 'centertop', 'Position', [.16 .77 .125 .2]);
+
+% create dropdown menu for conditions to simulate selection 
+
+condSel         = uicontrol(mainFig, 'Style', 'popupmenu', 'position', [50 385 120 20]);
+condSel.String = {'All Conditions', 'Risk Preference'};
+condSel.FontSize = 12;
+condSel.FontName = 'times';
+DistSel         = uicontrol(mainFig, 'Style', 'popupmenu', 'position', [230 385 130 20]);
+DistSel.String = {'Gaussian', 'Bimodal'};
+DistSel.FontSize = 12;
+DistSel.FontName = 'times';
+
+
+paramPanel      = uipanel(mainFig, 'title', 'Set Parameters', 'FontSize', 14,...
+    'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white', 'Position', [.02 .18 .27 .55]);
+
+% text_cndAll     = uicontrol(mainFig, 'Style', 'Text', 'String', 'ALL',...
+%         'FontSize', 9, 'FontWeight', 'bold', 'FontName', 'times', 'position',  [50 325 130 20]);
+% prompt_cndAll   = uicontrol(mainFig, 'Style', 'edit', 'position', [50 290 130 20]);
+% text_prefCond   = uicontrol(mainFig, 'Style', 'Text', 'String', 'Risk Pref. Only',...
+%         'FontSize', 9, 'FontWeight', 'bold', 'FontName', 'times', 'position',  [200 325 130 20]); 
+% prompt_prefCond   = uicontrol(mainFig, 'Style', 'edit', 'position', [200 290 130 20]);
 
 % prompts for parameter inputs 
 %%%% Variance paramaters
-text_ssafe   = uicontrol(mainFig, 'Style', 'Text', 'string', 'Set SAFE Variance',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [25 350 150 20]);
-prompt_ssafe = uicontrol(mainFig, 'Style', 'edit', 'position', [50 330 100 20]);
-text_srisky   = uicontrol(mainFig, 'Style', 'Text', 'string', 'Set RISKY Variance',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [25 300 150 20]);
-prompt_srisky = uicontrol(mainFig, 'Style', 'edit', 'position', [50 280 100 20]);
+varPanel      = uipanel(mainFig, 'title', 'Variance:', 'FontSize', 12,...
+    'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
+    'TitlePosition', 'centertop',  'Position', [.032 .53 .25 .15]);
+text_ssafe   = uicontrol(mainFig, 'Style', 'Text', 'string', 'SAFE',...
+    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [55 250 100 40]);
+prompt_ssafe = uicontrol(mainFig, 'Style', 'edit', 'position', [80 255 50 20]);
+text_srisky   = uicontrol(mainFig, 'Style', 'Text', 'string', 'RISKY',...
+    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [260 250 100 40]);
+prompt_srisky = uicontrol(mainFig, 'Style', 'edit', 'position', [285 255 50 20]);
 %%%% Learning rate parameters
-text_aq   = uicontrol(mainFig, 'Style', 'Text', 'string', 'Set Q Learning Rate',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [30 230 150 20]);
-prompt_aq = uicontrol(mainFig, 'Style', 'edit', 'position', [50 210 100 20]);
-text_as   = uicontrol(mainFig, 'Style', 'Text', 'string', 'Set S Learning Rate',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [30 180 150 20]);
-prompt_as = uicontrol(mainFig, 'Style', 'edit', 'position', [50 160 100 20]);
+lrPanel      = uipanel(mainFig, 'title', 'Learing Rates:', 'FontSize', 12,...
+    'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
+    'TitlePosition', 'centertop',  'Position', [.032 .37 .25 .15]);
+text_aq   = uicontrol(mainFig, 'Style', 'Text', 'string', 'Q',...
+    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [55 178 100 40]);
+prompt_aq = uicontrol(mainFig, 'Style', 'edit', 'position', [80 184 50 20]);
+text_as   = uicontrol(mainFig, 'Style', 'Text', 'string', 'S',...
+    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [260 178 100 40]);
+prompt_as = uicontrol(mainFig, 'Style', 'edit', 'position', [285 184 50 20]);
 %%%% Choice Parameters
-text_beta  = uicontrol(mainFig, 'Style', 'Text', 'string', 'Set Beta',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [25 100 150 20]);
-prompt_beta = uicontrol(mainFig, 'Style', 'edit', 'FontName', 'times', 'position', [50 80 100 20]);
-text_omega   = uicontrol(mainFig, 'Style', 'Text', 'string', 'Set Omega',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [25 50 150 20]);
-prompt_omega = uicontrol(mainFig, 'Style', 'edit', 'position', [50 30 100 20]);
+smPanel      = uipanel(mainFig, 'title', 'softmax:', 'FontSize', 12,...
+    'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
+    'TitlePosition', 'centertop',  'Position', [.032 .21 .25 .15]);
+text_beta  = uicontrol(mainFig, 'Style', 'Text', 'string', 'Beta',...
+    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [55 108 100 40]);
+prompt_beta = uicontrol(mainFig, 'Style', 'edit', 'FontName', 'times', 'position', [80 112 50 20]);
+text_omega   = uicontrol(mainFig, 'Style', 'Text', 'string', 'Omega',...
+    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [260 108 100 40]);
+prompt_omega = uicontrol(mainFig, 'Style', 'edit', 'position', [285 112 50 20]);
 
 % button to be clicked and generate plot
  
-plotGauss = uicontrol(mainFig, 'Style', 'pushbutton', 'string', 'Gaussian Distribution',...
-    'FontSize', 11, 'FontWeight', 'bold', 'FontName', 'times', 'position', [190 210 150 50]);
+plotSim = uicontrol(mainFig, 'Style', 'pushbutton', 'string', 'Simulate',...
+    'FontSize', 16, 'FontWeight', 'bold', 'FontName', 'times', 'position', [90 20 250 50]);
+plotSim.Callback = @plotPEIRS_simulated;
 
-plotBimodal = uicontrol(mainFig, 'Style', 'pushbutton', 'string', 'Bimodal Distribution',...
-    'FontSize', 11, 'FontWeight', 'bold', 'FontName', 'times', 'position', [190 145 150 50]);
-
-plotBimodal.Callback = @plotPEIRS_simulated;
-plotGauss.Callback = @plotPEIRS_simulated;
 %initialise variables to be input into the plotting function
 s_safe = []; s_risky = []; alpha_q = []; alpha_s = []; beta = []; omega = []; distType = [];
 
