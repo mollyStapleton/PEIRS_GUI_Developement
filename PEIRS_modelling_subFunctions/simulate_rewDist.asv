@@ -1,0 +1,20 @@
+function [R] = simulate_rewDist(distType)
+
+R = zeros(120, 4);
+
+if distType == 1
+    % Gaussian
+    R1 = randn*5+40;
+    R2 = randn*15+40;
+    R3 = randn*5+60;
+    R4 = randn*15+60;
+
+else
+
+
+
+
+
+
+
+end

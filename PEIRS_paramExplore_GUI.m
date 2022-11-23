@@ -8,7 +8,6 @@ mainFig = figure;
 mainFig.Name = 'mainWindow';
 mainFig.Position = [185.8000 172.2000 1.3296e+03 453.6000];
 
-    
 %----------------------------------------------------------------------------
 % GENERATE BASIC GRAPHICS FOR USER INPUT AND THE AXES FOR PLOTS 
 %------------------------------------------------------------------------------------
@@ -30,23 +29,18 @@ condSel         = uicontrol(mainFig, 'Style', 'popupmenu', 'position', [50 385 1
 condSel.String = {'All Conditions', 'Risk Preference'};
 condSel.FontSize = 12;
 condSel.FontName = 'times';
+condSel.Callback = @plotPEIRS_simulated;
+
 DistSel         = uicontrol(mainFig, 'Style', 'popupmenu', 'position', [230 385 130 20]);
 DistSel.String = {'Gaussian', 'Bimodal'};
 DistSel.FontSize = 12;
 DistSel.FontName = 'times';
+DistSel.Callback = @plotPEIRS_simulated;
 
 
 paramPanel      = uipanel(mainFig, 'title', 'Set Parameters', 'FontSize', 14,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white', 'Position', [.02 .18 .27 .55]);
 
-% text_cndAll     = uicontrol(mainFig, 'Style', 'Text', 'String', 'ALL',...
-%         'FontSize', 9, 'FontWeight', 'bold', 'FontName', 'times', 'position',  [50 325 130 20]);
-% prompt_cndAll   = uicontrol(mainFig, 'Style', 'edit', 'position', [50 290 130 20]);
-% text_prefCond   = uicontrol(mainFig, 'Style', 'Text', 'String', 'Risk Pref. Only',...
-%         'FontSize', 9, 'FontWeight', 'bold', 'FontName', 'times', 'position',  [200 325 130 20]); 
-% prompt_prefCond   = uicontrol(mainFig, 'Style', 'edit', 'position', [200 290 130 20]);
-
-% prompts for parameter inputs 
 %%%% Variance paramaters
 varPanel      = uipanel(mainFig, 'title', 'Variance:', 'FontSize', 12,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
@@ -84,77 +78,48 @@ plotSim = uicontrol(mainFig, 'Style', 'pushbutton', 'string', 'Simulate',...
     'FontSize', 16, 'FontWeight', 'bold', 'FontName', 'times', 'position', [90 20 250 50]);
 plotSim.Callback = @plotPEIRS_simulated;
 
-%initialise variables to be input into the plotting function
-s_safe = []; s_risky = []; alpha_q = []; alpha_s = []; beta = []; omega = []; distType = [];
+%-------------------------------------------------------------------------------
+%-----------------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------------
+%-----------------------------------------------------------------------------------
+%------ PUSH BUTTON AND SUBSEQUENT FUNCTIONS------------------------------
+%-------------------------------------------------------------------------------
+%-----------------------------------------------------------------------------------
+
+%initialise variables to be input into the plotting function
+s_safe = []; s_risky = []; alpha_q = []; alpha_s = [];
+beta = []; omega = []; distType = [];
+inp = [];
 
     function plotPEIRS_simulated(src, event)
 
-        if strfind(event.Source.String, 'Gaussian Distribution')
+
+        if DistSel.Value == 1 %gaussian
             distType = 1;
             lowcol = [0.83 0.71 0.98];
-            highcol = [0.62 0.35 0.99];        
-        else 
+            highcol = [0.62 0.35 0.99];
+        else
             distType = 2;
             lowcol = [0.58 0.99 0.56];
-            highcol = [0.19 0.62 0.14]; 
+            highcol = [0.19 0.62 0.14];
         end
 
-        cla(ax_valueRate);
-        cla(ax_probRisky);
-        % return all of the values input by the user within each prompt
-        inp = get(prompt_ssafe, 'string');
-        inp = str2num(inp);
-        s_safe  = inp;
-        inp = get(prompt_srisky, 'string');
-        inp = str2num(inp);
-        s_risky  = inp;
+        callback_simParams;
+        
+        if condSel.Value == 1 % all conditions
 
-        inp = get(prompt_aq, 'string');
-        inp = str2num(inp);
-        alpha_q  = inp;
+            [out1, out2, out3, out4, out_low, out_high] = simulatePEIRS_allCond(s_safe,...
+                s_risky, alpha_q, alpha_s, beta, omega, distType);
 
-        inp = get(prompt_as, 'string');
-        inp = str2num(inp);
-        alpha_s  = inp;
+        else condSel.Value == 2
 
-        inp = get(prompt_beta, 'string');
-        inp = str2num(inp);
-        beta  = inp;
+            [out1, out2, out3, out4, out_low, out_high] = simulatePEIRS_riskCond(s_safe,...
+            s_risky, alpha_q, alpha_s, beta, omega, distType);
 
-        inp = get(prompt_omega, 'string');
-        inp = str2num(inp);
-        omega  = inp;
+        end
 
-out1 = []; out2 = []; out3 = [];  out4 = [];  out_low = []; out_high = [];
-
-
-[out1, out2, out3, out4, out_low, out_high] = generatePlots_PEIRS_simulated(s_safe,...
-    s_risky, alpha_q, alpha_s, beta, omega, distType);
-
-
-    axes(ax_valueRate);
-    plot(nanmean(out1), 'linestyle', '--', 'color', lowcol, 'LineWidth', 2);
-    hold on 
-    plot(nanmean(out2), 'linestyle', '-', 'color', lowcol, 'LineWidth', 2);
-    hold on 
-    plot(nanmean(out3), 'linestyle', '--', 'color', highcol, 'LineWidth', 2);
-    hold on 
-    plot(nanmean(out4), 'linestyle', '-', 'color', highcol, 'LineWidth', 2);
-    legend({'Low-Safe', 'Low-Risky', 'High-Safe', 'High-Risky'});
-    xlabel('No. Trials');
-    ylabel('Simulated Average Value + Spread');
-    title('\bf \fontsize{10} Change in Value over Trials');
-
-% 
-    axes(ax_probRisky);
-    plot(nanmean(out_low), 'color', lowcol, 'linew', 1.2);
-    hold on
-    plot(nanmean(out_high), 'color', highcol,'linew', 1.2);
-    legend({'P(Risky|Both-LOW)', 'P(Risky|Both-High)'});
-    ylabel('P(Risky|ConditionType)');
-    xlabel('No. Trials');
-    title({'\bf \fontsize{10}  P(risky| Both-High)', 'vs', 'P(risky|Both-Low)'});
+        simulation_plot_graphics;
 
 
     end
