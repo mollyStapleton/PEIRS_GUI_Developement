@@ -1,11 +1,12 @@
 axes(ax_valueRate);
-plot(nanmean(out1), 'linestyle', '--', 'color', lowcol, 'LineWidth', 2);
+
+plot(nanmean(Q_out{1, 1}'), 'linestyle', '--', 'color', lowcol, 'LineWidth', 2);
 hold on
-plot(nanmean(out2), 'linestyle', '-', 'color', lowcol, 'LineWidth', 2);
+plot(nanmean(Q_out{2})', 'linestyle', '-', 'color', lowcol, 'LineWidth', 2);
 hold on
-plot(nanmean(out3), 'linestyle', '--', 'color', highcol, 'LineWidth', 2);
+plot(nanmean(Q_out{3})', 'linestyle', '--', 'color', highcol, 'LineWidth', 2);
 hold on
-plot(nanmean(out4), 'linestyle', '-', 'color', highcol, 'LineWidth', 2);
+plot(nanmean(Q_out{4})', 'linestyle', '-', 'color', highcol, 'LineWidth', 2);
 legend({'Low-Safe', 'Low-Risky', 'High-Safe', 'High-Risky'});
 xlabel('No. Trials');
 ylabel('Simulated Average Value + Spread');
