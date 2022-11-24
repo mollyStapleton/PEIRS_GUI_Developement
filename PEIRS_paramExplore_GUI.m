@@ -41,16 +41,17 @@ DistSel.Callback = @plotPEIRS_simulated;
 paramPanel      = uipanel(mainFig, 'title', 'Set Parameters', 'FontSize', 14,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white', 'Position', [.02 .18 .27 .55]);
 
-%%%% Variance paramaters
-varPanel      = uipanel(mainFig, 'title', 'Variance:', 'FontSize', 12,...
+%%%% Starting Paramaters
+varPanel      = uipanel(mainFig, 'title', 'Initial Parameters', 'FontSize', 12,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
     'TitlePosition', 'centertop',  'Position', [.032 .53 .25 .15]);
-text_ssafe   = uicontrol(mainFig, 'Style', 'Text', 'string', 'SAFE',...
+text_qstart   = uicontrol(mainFig, 'Style', 'Text', 'string', 'Q0',...
     'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [55 250 100 40]);
-prompt_ssafe = uicontrol(mainFig, 'Style', 'edit', 'position', [80 255 50 20]);
-text_srisky   = uicontrol(mainFig, 'Style', 'Text', 'string', 'RISKY',...
+prompt_qstart = uicontrol(mainFig, 'Style', 'popupmenu', 'position', [80 255 50 20]);
+prompt_qstart.String = {'50'};
+text_sstart   = uicontrol(mainFig, 'Style', 'Text', 'string', 'S0',...
     'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [260 250 100 40]);
-prompt_srisky = uicontrol(mainFig, 'Style', 'edit', 'position', [285 255 50 20]);
+prompt_sstart = uicontrol(mainFig, 'Style', 'edit', 'position', [285 255 50 20]);
 %%%% Learning rate parameters
 lrPanel      = uipanel(mainFig, 'title', 'Learing Rates:', 'FontSize', 12,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
@@ -88,8 +89,8 @@ plotSim.Callback = @plotPEIRS_simulated;
 %-----------------------------------------------------------------------------------
 
 %initialise variables to be input into the plotting function
-s_safe = []; s_risky = []; alpha_q = []; alpha_s = [];
-beta = []; omega = []; distType = [];
+Q0 = []; S0 = []; alpha_q = []; alpha_s = [];
+beta = []; omega = []; distType = []; condType = [];
 inp = [];
 
     function plotPEIRS_simulated(src, event)
@@ -105,21 +106,55 @@ inp = [];
             highcol = [0.19 0.62 0.14];
         end
 
-        callback_simParams;
-        
-        if condSel.Value == 1 % all conditions
-
-            [Q_out, S_out, P_out] = simulatePEIRS_allCond(s_safe,s_risky, alpha_q,...
-                alpha_s, beta, omega, distType);
-
-        else condSel.Value == 2
-
-            [out1, out2, out3, out4, out_low, out_high] = simulatePEIRS_riskCond(s_safe,...
-            s_risky, alpha_q, alpha_s, beta, omega, distType);
-
+        if condSel.Value == 1
+            condType = 1; %all
+        else
+            condType = 2; %risk preference only
         end
 
-        simulation_plot_graphics;
+        Q0 = str2num(prompt_qstart.String{1});
+
+        callback_simParams;
+        
+%         if condSel.Value == 1 % all conditions
+
+            [Q_out, S_out, P_out] = simulatePEIRS_allCond(Q0, S0, alpha_q,...
+                alpha_s, beta, omega, distType, condType);
+
+%         else condSel.Value == 2
+
+%             [out1, out2, out3, out4, out_low, out_high] = simulatePEIRS_riskCond(s_safe,...
+%             s_risky, alpha_q, alpha_s, beta, omega, distType);
+% 
+%         end
+
+        axes(ax_valueRate);
+
+plot(nanmean(Q_out{1}), 'linestyle', '--', 'color', lowcol, 'LineWidth', 2);
+
+hold on
+plot(nanmean(Q_out{2}), 'linestyle', '-', 'color', lowcol, 'LineWidth', 2);
+hold on
+plot(nanmean(Q_out{3}), 'linestyle', '--', 'color', highcol, 'LineWidth', 2);
+hold on
+plot(nanmean(Q_out{4}), 'linestyle', '-', 'color', highcol, 'LineWidth', 2);
+legend({'Low-Safe', 'Low-Risky', 'High-Safe', 'High-Risky'});
+xlabel('No. Trials');
+ylabel('Simulated Average Value + Spread');
+title('\bf \fontsize{10} Change in Value over Trials');
+
+%
+axes(ax_probRisky);
+% low-risky
+plot(nanmean(P_out{2}), 'color', lowcol, 'lineStyle', '--', 'linew', 1.2);
+hold on
+% high-risky
+plot(nanmean(P_out{4}), 'color', highcol, 'lineStyle', '-', 'linew', 1.2);
+legend({'Low-Risky', 'High-Risky'});
+ylabel('P(StimChosen|StimulusShown)');
+xlabel('No. Trials');
+title({'\bf \fontsize{10}  Risk Prefernces'});
+%         simulation_plot_graphics;
 
 
     end
