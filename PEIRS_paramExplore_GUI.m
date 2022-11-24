@@ -153,12 +153,12 @@ inp = [];
         % low-risky
         plot(nanmean(P_out{2}), 'color', lowcol, 'lineStyle', '-', 'linew', 1.2);
         hold on 
-        smoothLow = smoothdata(nanmean(P_out{2}), 'gaussian', 20);
+        smoothLow = smoothdata(nanmean(P_out{2}), 'movmean', 24);
         plot(smoothLow, 'color', lowcol, 'lineStyle', '-', 'linew', 3);
         % high-risk
         plot(nanmean(P_out{4}), 'color', highcol, 'lineStyle', '-', 'linew', 1.2);
         hold on
-        smoothHigh = smoothdata(nanmean(P_out{4}), 'gaussian', 20);
+        smoothHigh = smoothdata(nanmean(P_out{4}), 'movmean', 24);
         plot(smoothHigh, 'color', highcol, 'lineStyle', '-', 'linew', 3);
         ylabel('P(Risky)');
         xlabel('No. Trials');

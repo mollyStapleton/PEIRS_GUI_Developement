@@ -20,6 +20,7 @@ if distType == 1
 else
 
     R = bimodal_distr;
+    R = {R(:, 1), R(:, 2), R(:, 3), R(:, 4)};
 
 
 end

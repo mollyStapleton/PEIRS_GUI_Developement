@@ -72,7 +72,7 @@ for i = 1: iters
         St(stim_chosen) = St(stim_chosen) + alpha_s * delta_spread;
         
         % update previous spread value
-        St = St - S0;
+%         St = St - S0;
 
         % store the upated Q value
         Q_all(stim_chosen, t) = Qt(stim_chosen);
