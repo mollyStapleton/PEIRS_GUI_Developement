@@ -58,7 +58,6 @@ for i = 1: iters
             stim_chosen    =  stim2_t;
             stim_unchosen  =  stim1_t;      
         end
-
         
         R_t(t) = R{stim_chosen}(1);
         R{stim_chosen}(1) = []; %removes value so cannot be reused
@@ -73,7 +72,7 @@ for i = 1: iters
         St(stim_chosen) = St(stim_chosen) + alpha_s * delta_spread;
         
         % update previous spread value
-%         St = St + 3.31;
+        St = St - S0;
 
         % store the upated Q value
         Q_all(stim_chosen, t) = Qt(stim_chosen);

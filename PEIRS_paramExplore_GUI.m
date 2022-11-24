@@ -12,8 +12,9 @@ mainFig.Position = [185.8000 172.2000 1.3296e+03 453.6000];
 % GENERATE BASIC GRAPHICS FOR USER INPUT AND THE AXES FOR PLOTS 
 %------------------------------------------------------------------------------------
 % create axes for simulated average reward and spread to be plotted onto
-ax_valueRate = uiaxes(mainFig, 'position', [420 30 400 400]);
-ax_probRisky = uiaxes(mainFig, 'position', [860 30 400 400]);
+ax_valueRate  = uiaxes(mainFig, 'position', [420 250 400 200]);
+ax_spreadRate = uiaxes(mainFig, 'position', [420 30 400 200]);
+ax_probRisky  = uiaxes(mainFig, 'position', [860 30 400 400]);
 
 CondPanel      = uipanel(mainFig, 'title', 'Conditions', 'FontSize', 14,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
@@ -115,48 +116,61 @@ inp = [];
         Q0 = str2num(prompt_qstart.String{1});
 
         callback_simParams;
-        
-%         if condSel.Value == 1 % all conditions
 
-            [Q_out, S_out, P_out] = simulatePEIRS_allCond(Q0, S0, alpha_q,...
-                alpha_s, beta, omega, distType, condType);
+        [Q_out, S_out, P_out] = simulatePEIRS_allCond(Q0, S0, alpha_q,...
+            alpha_s, beta, omega, distType, condType);
 
-%         else condSel.Value == 2
-
-%             [out1, out2, out3, out4, out_low, out_high] = simulatePEIRS_riskCond(s_safe,...
-%             s_risky, alpha_q, alpha_s, beta, omega, distType);
-% 
-%         end
 
         axes(ax_valueRate);
+        plot(nanmean(Q_out{1}), 'linestyle', '--', 'color', lowcol, 'LineWidth', 2);
+        hold on
+        plot(nanmean(Q_out{2}), 'linestyle', '-', 'color', lowcol, 'LineWidth', 2);
+        hold on
+        plot(nanmean(Q_out{3}), 'linestyle', '--', 'color', highcol, 'LineWidth', 2);
+        hold on
+        plot(nanmean(Q_out{4}), 'linestyle', '-', 'color', highcol, 'LineWidth', 2);
+        legend({'Low-Safe', 'Low-Risky', 'High-Safe', 'High-Risky'});
+        xlabel('No. Trials');
+        ylabel({'Simulated Average',  'Value (Learned)'});
+        title('\bf \fontsize{12} Change in Value over Trials');
+        set(gca, 'FontName', 'times');
 
-plot(nanmean(Q_out{1}), 'linestyle', '--', 'color', lowcol, 'LineWidth', 2);
+        axes(ax_spreadRate);
+        plot(nanmean(S_out{1}), 'linestyle', '--', 'color', lowcol, 'LineWidth', 2);
+        hold on
+        plot(nanmean(S_out{2}), 'linestyle', '-', 'color', lowcol, 'LineWidth', 2);
+        hold on
+        plot(nanmean(S_out{3}), 'linestyle', '--', 'color', highcol, 'LineWidth', 2);
+        hold on
+        plot(nanmean(S_out{4}), 'linestyle', '-', 'color', highcol, 'LineWidth', 2);
+        legend({'Low-Safe', 'Low-Risky', 'High-Safe', 'High-Risky'});
+        xlabel('No. Trials');
+        ylabel({'Simulated Average',  'Spread (Learned)'});
+        title('\bf \fontsize{12} Change in Spread over Trials');
+        set(gca, 'FontName', 'times');
+        
+        axes(ax_probRisky);
+        % low-risky
+        plot(nanmean(P_out{2}), 'color', lowcol, 'lineStyle', '-', 'linew', 1.2);
+        hold on 
+        smoothLow = smoothdata(nanmean(P_out{2}), 'gaussian', 20);
+        plot(smoothLow, 'color', lowcol, 'lineStyle', '-', 'linew', 3);
+        % high-risk
+        plot(nanmean(P_out{4}), 'color', highcol, 'lineStyle', '-', 'linew', 1.2);
+        hold on
+        smoothHigh = smoothdata(nanmean(P_out{4}), 'gaussian', 20);
+        plot(smoothHigh, 'color', highcol, 'lineStyle', '-', 'linew', 3);
+        ylabel('P(Risky)');
+        xlabel('No. Trials');
+        title({'\bf \fontsize{12}  Risk Preferences'});
+        set(gca, 'FontName', 'times')
+        hold on 
+        plot([0 120], [0.5 0.5], 'k--');
+        legend({'Low-Risky (Sim.)', 'Low-Risky (Smoothed)', 'High-Risky (Sim.)',...
+            'High-Risky (Smoothed)', ''});
 
-hold on
-plot(nanmean(Q_out{2}), 'linestyle', '-', 'color', lowcol, 'LineWidth', 2);
-hold on
-plot(nanmean(Q_out{3}), 'linestyle', '--', 'color', highcol, 'LineWidth', 2);
-hold on
-plot(nanmean(Q_out{4}), 'linestyle', '-', 'color', highcol, 'LineWidth', 2);
-legend({'Low-Safe', 'Low-Risky', 'High-Safe', 'High-Risky'});
-xlabel('No. Trials');
-ylabel('Simulated Average Value + Spread');
-title('\bf \fontsize{10} Change in Value over Trials');
-
-%
-axes(ax_probRisky);
-% low-risky
-plot(nanmean(P_out{2}), 'color', lowcol, 'lineStyle', '--', 'linew', 1.2);
-hold on
-% high-risky
-plot(nanmean(P_out{4}), 'color', highcol, 'lineStyle', '-', 'linew', 1.2);
-legend({'Low-Risky', 'High-Risky'});
-ylabel('P(StimChosen|StimulusShown)');
-xlabel('No. Trials');
-title({'\bf \fontsize{10}  Risk Prefernces'});
-%         simulation_plot_graphics;
-
-
+            
+      
     end
 
 end

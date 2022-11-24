@@ -1,4 +1,4 @@
-function [Q_out, S_out, P_out] = simulatePEIRS_allCond(s_safe, s_risky, alpha_q, alpha_s, beta, omega, distType, condType)
+function [Q_out, S_out, P_out] = simulatePEIRS_allCond(Q0, S0, alpha_q, alpha_s, beta, omega, distType, condType)
 
 iters=1000; %simulate 1000 blocks
 
@@ -8,8 +8,8 @@ for i = 1: iters
     %generate reward distribtion
 
     [R] = simulate_rewDist(distType);
-    Qt = [50 50 50 50];
-    St = [s_safe s_risky s_safe s_risky];
+    Qt = [Q0 Q0 Q0 Q0];
+    St = [S0 S0 S0 S0];
 
     % portion of code taken from Moeller toolbox 
     % generates stimulus indices the same as ours with fewer lines of code
@@ -58,14 +58,11 @@ for i = 1: iters
             stim_chosen    =  stim2_t;
             stim_unchosen  =  stim1_t;      
         end
-
         
         R_t(t) = R{stim_chosen}(1);
         R{stim_chosen}(1) = []; %removes value so cannot be reused
 
         % updating the action values annd learning rates 
-        
-%         St = St + alpha_s;
 
         delta = R_t(t) - Qt(stim_chosen); % current trial prediction error
         delta_spread = abs(delta) - St(stim_chosen); 
@@ -75,23 +72,28 @@ for i = 1: iters
         St(stim_chosen) = St(stim_chosen) + alpha_s * delta_spread;
         
         % update previous spread value
-%         St = St - alpha_s;
+%         St = St + 3.31;
 
         % store the upated Q value
         Q_all(stim_chosen, t) = Qt(stim_chosen);
         % store the updated S value
         S_all(stim_chosen, t) = St(stim_chosen);
         % store stimulus specific p value
-        pt(stim_chosen, t)    = p(1, t);
+        % store risky choices from the both-high and both-low conditions
+        if stimuliShown(t) == 12 || stimuliShown(t) == 21 ||...
+            stimuliShown(t) == 34 || stimuliShown(t) == 43
+            %both-low and both-high conditions indices
+            pt(stim_chosen, t)   = p(1, t);
+        end
+        
                
     end
 
     for istim = 1:4
         Q_out{istim}(i, :)   = Q_all(istim, :);
         S_out{istim}(i, :)   = S_all(istim, :);
-        if stimuliShown(t) == {12 21 34 43} %both-low and both-high conditions indices
-            P_out{istim}(i, :)   = pt(istim, :);
-        end
+        P_out{istim}(i, :)   = pt(istim, :);
+      
     end
 
 end
