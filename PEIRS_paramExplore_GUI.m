@@ -117,7 +117,7 @@ inp = [];
 
         callback_simParams;
 
-        [Q_out, S_out, P_out] = simulatePEIRS_allCond(Q0, S0, alpha_q,...
+        [Q_out, S_out, P_out, p_risky_out] = simulatePEIRS_allCond(Q0, S0, alpha_q,...
             alpha_s, beta, omega, distType, condType);
 
 
@@ -148,17 +148,19 @@ inp = [];
         ylabel({'Simulated Average',  'Spread (Learned)'});
         title('\bf \fontsize{12} Change in Spread over Trials');
         set(gca, 'FontName', 'times');
+
+
         
         axes(ax_probRisky);
         % low-risky
-        plot(nanmean(P_out{2}), 'color', lowcol, 'lineStyle', '-', 'linew', 1.2);
+        plot(p_risky_out(:, 2), 'color', lowcol, 'lineStyle', '-', 'linew', 1.2);
         hold on 
-        smoothLow = smoothdata(nanmean(P_out{2}), 'movmean', 24);
+        smoothLow = smoothdata(p_risky_out(:, 2), 'movmean', 24);
         plot(smoothLow, 'color', lowcol, 'lineStyle', '-', 'linew', 3);
         % high-risk
-        plot(nanmean(P_out{4}), 'color', highcol, 'lineStyle', '-', 'linew', 1.2);
+        plot(p_risky_out(:, 4), 'color', highcol, 'lineStyle', '-', 'linew', 1.2);
         hold on
-        smoothHigh = smoothdata(nanmean(P_out{4}), 'movmean', 24);
+        smoothHigh = smoothdata(p_risky_out(:, 4), 'movmean', 24);
         plot(smoothHigh, 'color', highcol, 'lineStyle', '-', 'linew', 3);
         ylabel('P(Risky)');
         xlabel('No. Trials');
@@ -167,7 +169,7 @@ inp = [];
         hold on 
         plot([0 120], [0.5 0.5], 'k--');
         legend({'Low-Risky (Sim.)', 'Low-Risky (Smoothed)', 'High-Risky (Sim.)',...
-            'High-Risky (Smoothed)', ''});
+            'High-Risky (Smoothed)', ''},'location', 'best');
 
             
       
