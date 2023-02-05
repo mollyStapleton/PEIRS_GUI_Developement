@@ -1,4 +1,4 @@
-function PEIRS_paramExplor_GUI
+function posNegRates_paramExplor_GUI
 
 clc 
 clear
@@ -12,9 +12,9 @@ mainFig.Position = [185.8000 172.2000 1.3296e+03 453.6000];
 % GENERATE BASIC GRAPHICS FOR USER INPUT AND THE AXES FOR PLOTS 
 %------------------------------------------------------------------------------------
 % create axes for simulated average reward and spread to be plotted onto
-ax_valueRate  = uiaxes(mainFig, 'position', [420 250 400 200]);
-ax_spreadRate = uiaxes(mainFig, 'position', [420 30 400 200]);
+ax_valueRate  = uiaxes(mainFig, 'position', [420 30 400 400]);
 ax_probRisky  = uiaxes(mainFig, 'position', [860 30 400 400]);
+
 
 CondPanel      = uipanel(mainFig, 'title', 'Conditions', 'FontSize', 14,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
@@ -30,13 +30,13 @@ condSel         = uicontrol(mainFig, 'Style', 'popupmenu', 'position', [50 385 1
 condSel.String = {'All Conditions', 'Risk Preference'};
 condSel.FontSize = 12;
 condSel.FontName = 'times';
-condSel.Callback = @plotPEIRS_simulated;
+condSel.Callback = @plot_posNegRates_simulated;
 
 DistSel         = uicontrol(mainFig, 'Style', 'popupmenu', 'position', [230 385 130 20]);
 DistSel.String = {'Gaussian', 'Bimodal'};
 DistSel.FontSize = 12;
 DistSel.FontName = 'times';
-DistSel.Callback = @plotPEIRS_simulated;
+DistSel.Callback = @plot_posNegRates_simulated;
 
 
 paramPanel      = uipanel(mainFig, 'title', 'Set Parameters', 'FontSize', 14,...
@@ -47,54 +47,40 @@ varPanel      = uipanel(mainFig, 'title', 'Initial Parameters', 'FontSize', 12,.
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
     'TitlePosition', 'centertop',  'Position', [.032 .53 .25 .15]);
 text_qstart   = uicontrol(mainFig, 'Style', 'Text', 'string', 'Q0',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [55 250 100 40]);
-prompt_qstart = uicontrol(mainFig, 'Style', 'popupmenu', 'position', [80 255 50 20]);
+    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [160 250 100 40]);
+prompt_qstart = uicontrol(mainFig, 'Style', 'popupmenu', 'position', [190 255 50 20]);
 prompt_qstart.String = {'50'};
-text_sstart   = uicontrol(mainFig, 'Style', 'Text', 'string', 'S0',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [260 250 100 40]);
-prompt_sstart = uicontrol(mainFig, 'Style', 'edit', 'position', [285 255 50 20]);
+
 %%%% Learning rate parameters
 lrPanel      = uipanel(mainFig, 'title', 'Learing Rates:', 'FontSize', 12,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
     'TitlePosition', 'centertop',  'Position', [.032 .37 .25 .15]);
-text_aq   = uicontrol(mainFig, 'Style', 'Text', 'string', 'Q',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [55 178 100 40]);
-prompt_aq = uicontrol(mainFig, 'Style', 'edit', 'position', [80 184 50 20]);
-text_as   = uicontrol(mainFig, 'Style', 'Text', 'string', 'S',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [260 178 100 40]);
-prompt_as = uicontrol(mainFig, 'Style', 'edit', 'position', [285 184 50 20]);
+text_ap   = uicontrol(mainFig, 'Style', 'Text', 'string', '+ve',...
+    'FontSize', 9, 'FontWeight', 'bold', 'FontName', 'times', 'position', [55 178 100 40]);
+prompt_ap = uicontrol(mainFig, 'Style', 'edit', 'position', [80 184 50 20]);
+text_an   = uicontrol(mainFig, 'Style', 'Text', 'string', '-ve',...
+    'FontSize', 9, 'FontWeight', 'bold', 'FontName', 'times', 'position', [260 178 100 40]);
+prompt_an = uicontrol(mainFig, 'Style', 'edit', 'position', [285 184 50 20]);
 %%%% Choice Parameters
 smPanel      = uipanel(mainFig, 'title', 'softmax:', 'FontSize', 12,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
     'TitlePosition', 'centertop',  'Position', [.032 .21 .25 .15]);
 text_beta  = uicontrol(mainFig, 'Style', 'Text', 'string', 'Beta',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [55 108 100 40]);
-prompt_beta = uicontrol(mainFig, 'Style', 'edit', 'FontName', 'times', 'position', [80 112 50 20]);
-text_omega   = uicontrol(mainFig, 'Style', 'Text', 'string', 'Omega',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [260 108 100 40]);
-prompt_omega = uicontrol(mainFig, 'Style', 'edit', 'position', [285 112 50 20]);
+    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [160 105 100 40]);
+prompt_beta = uicontrol(mainFig, 'Style', 'edit', 'FontName', 'times', 'position', [185 112 50 20]);
 
 % button to be clicked and generate plot
  
 plotSim = uicontrol(mainFig, 'Style', 'pushbutton', 'string', 'Simulate',...
     'FontSize', 16, 'FontWeight', 'bold', 'FontName', 'times', 'position', [90 20 250 50]);
-plotSim.Callback = @plotPEIRS_simulated;
-
-%-------------------------------------------------------------------------------
-%-----------------------------------------------------------------------------------
-
-%-------------------------------------------------------------------------------
-%-----------------------------------------------------------------------------------
-%------ PUSH BUTTON AND SUBSEQUENT FUNCTIONS------------------------------
-%-------------------------------------------------------------------------------
-%-----------------------------------------------------------------------------------
+plotSim.Callback = @plot_posNegRates_simulated;
 
 %initialise variables to be input into the plotting function
-Q0 = []; S0 = []; alpha_q = []; alpha_s = [];
-beta = []; omega = []; distType = []; condType = [];
+Q0 = []; alpha_p = []; alpha_n = [];
+beta = []; distType = []; condType = [];
 inp = [];
 
-    function plotPEIRS_simulated(src, event)
+    function plot_posNegRates_simulated(src, event)
 
 
         if DistSel.Value == 1 %gaussian
@@ -115,10 +101,10 @@ inp = [];
 
         Q0 = str2num(prompt_qstart.String{1});
 
-        callback_simParams;
+        callbackParams_posNegRates;
 
-        [Q_out, S_out, P_out, p_risky_out] = simulatePEIRS_allCond(Q0, S0, alpha_q,...
-            alpha_s, beta, omega, distType, condType);
+        [Q_out, P_out, p_risky_out] = simulatePosNegRates_allCond(Q0, alpha_p,...
+            alpha_n, beta, distType, condType);
 
 
         axes(ax_valueRate);
@@ -135,32 +121,16 @@ inp = [];
         title('\bf \fontsize{12} Change in Value over Trials');
         set(gca, 'FontName', 'times');
 
-        axes(ax_spreadRate);
-        plot(nanmean(S_out{1}), 'linestyle', '--', 'color', lowcol, 'LineWidth', 2);
-        hold on
-        plot(nanmean(S_out{2}), 'linestyle', '-', 'color', lowcol, 'LineWidth', 2);
-        hold on
-        plot(nanmean(S_out{3}), 'linestyle', '--', 'color', highcol, 'LineWidth', 2);
-        hold on
-        plot(nanmean(S_out{4}), 'linestyle', '-', 'color', highcol, 'LineWidth', 2);
-        legend({'Low-Safe', 'Low-Risky', 'High-Safe', 'High-Risky'});
-        xlabel('No. Trials');
-        ylabel({'Simulated Average',  'Spread (Learned)'});
-        title('\bf \fontsize{12} Change in Spread over Trials');
-        set(gca, 'FontName', 'times');
-
-        
-        
         axes(ax_probRisky);
         % low-risky
-        plot(nanmean(P_out{2}), 'color', lowcol, 'lineStyle', '-', 'linew', 1.2);
+        plot(p_risky_out(:, 2), 'color', lowcol, 'lineStyle', '-', 'linew', 1.2);
         hold on 
-        smoothLow = smoothdata(nanmean(P_out{2}), 'movmean', 24);
+        smoothLow = smoothdata(p_risky_out(:, 2), 'movmean', 24);
         plot(smoothLow, 'color', lowcol, 'lineStyle', '-', 'linew', 3);
         % high-risk
-        plot(nanmean(P_out{4}), 'color', highcol, 'lineStyle', '-', 'linew', 1.2);
+        plot(p_risky_out(:, 4), 'color', highcol, 'lineStyle', '-', 'linew', 1.2);
         hold on
-        smoothHigh = smoothdata(nanmean(P_out{4}), 'movmean', 24);
+        smoothHigh = smoothdata(p_risky_out(:, 4), 'movmean', 24);
         plot(smoothHigh, 'color', highcol, 'lineStyle', '-', 'linew', 3);
         ylabel('P(Risky)');
         xlabel('No. Trials');
@@ -169,7 +139,7 @@ inp = [];
         hold on 
         plot([0 120], [0.5 0.5], 'k--');
         legend({'Low-Risky (Sim.)', 'Low-Risky (Smoothed)', 'High-Risky (Sim.)',...
-            'High-Risky (Smoothed)', ''});
+            'High-Risky (Smoothed)', ''},'location', 'best');
 
             
       

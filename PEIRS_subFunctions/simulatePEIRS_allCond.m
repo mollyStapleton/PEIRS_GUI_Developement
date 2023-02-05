@@ -101,9 +101,7 @@ for i = 1: iters
             stimuliShown(t) == 34 || stimuliShown(t) == 43
             %both-low and both-high conditions indices
             pt(stim_chosen, t)   = p(1, t);
-        end
-        
-
+        end        
                
     end
 
@@ -141,13 +139,10 @@ end
 
 stimTotal_all = tmp_stotal1(1, :) + tmp_stotal2(1, :);
 
-
-for istim = 1:4
-
-    %total times each stimulus was CHOSEN at time point (t)
-    p_risky_out
-
-end
-
+%total times each stimulus was CHOSEN at time point (t)
+p_risky_out(:, 1) = sum(p_low_safe_out ==1, 1)./stimTotal_all(1);
+p_risky_out(:, 2) = sum(p_low_risky_out ==1, 1)./stimTotal_all(2);
+p_risky_out(:, 3) = sum(p_high_safe_out ==1, 1)./stimTotal_all(3);
+p_risky_out(:, 4) = sum(p_high_risky_out ==1, 1)./stimTotal_all(4);
 
 end
