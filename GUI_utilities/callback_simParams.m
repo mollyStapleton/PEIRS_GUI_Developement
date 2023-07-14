@@ -1,6 +1,12 @@
-cla(ax_valueRate);
-cla(ax_probRisky);
-cla(ax_spreadRate);
+
+% if ~hold_axes
+%     cla(ax_valueRate);
+%     cla(ax_probRisky);
+%     cla(ax_spreadRate);
+%     cla(ax_deltaStim);
+%     cla(ax_accuracy);
+% end
+
 % return all of the values input by the user within each prompt
 inp = get(prompt_sstart, 'string');
 inp = str2num(inp);
