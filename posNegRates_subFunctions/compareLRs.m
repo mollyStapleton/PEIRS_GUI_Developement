@@ -1,14 +1,15 @@
-function [Q_out, S_out, P_out, p_risky_out] = simulatePEIRS_allCond(Q0, S0, alpha_q, alpha_s, beta, omega, distType, condType)
+function [risky_HH, risky_LL] = compareLRs(Q0, alpha_p, alpha_n, beta, distType, condType)
 
-iters=1000; %simulate 1000 blocks
-
+iters                   = 1000; %simulate 1000 blocks
+risky_HH                = zeros(1, iters);
+risky_LL                = zeros(1, iters);
+    
 for i = 1: iters 
 
     %generate reward distribtion
 
     [R] = simulate_rewDist(distType);
     Qt = [Q0 Q0 Q0 Q0];
-    St = [S0 S0 S0 S0];
 
     % portion of code taken from Moeller toolbox 
     % generates stimulus indices the same as ours with fewer lines of code
@@ -28,7 +29,6 @@ for i = 1: iters
     p                   = NaN(1, 120);
     pt                  = NaN(4, 120); %return the probability for each stimulus 
     Q_all               = NaN(4, 120);
-    S_all               = NaN(4, 120);
 
     % generate vector of 0s to store choices to each stimulus as a binary
     % matrix 
@@ -38,22 +38,15 @@ for i = 1: iters
     p_high_safe         = zeros(120, 1);
     p_high_risky        = zeros(120, 1);
 
+    p_risky_out         = zeros(iters, 4);
+
     for t = 1: 120 % 120 trials per block
 
         % indices of stimuli shown
         stim1_t   = stim1(t);
         stim2_t   = stim2(t);
 
-        delta_stim(t) = ( Qt(stim1_t) + Qt(stim2_t) ) / 2 - sum(Qt(1:4)) / 4;
-        PEIRS(t) = tanh(omega * delta_stim(t));
-
-        % compute V for stim 1 and stim 2:
-        V1 = Qt(stim1_t) + PEIRS(t) * St(stim1_t);
-        V2 = Qt(stim2_t) + PEIRS(t) * St(stim2_t);
-
-        % Compute differential between stim2 and stim1
-        dV(t) = V1 - V2;
-        p(1, t) = VBA_sigmoid( beta * dV(t));
+        p(1, t) = VBA_sigmoid( beta * (Qt(stim1_t) - Qt(stim2_t)));
 
         if p(1, t) > rand
             stim_chosen    =  stim1_t;
@@ -64,57 +57,60 @@ for i = 1: iters
         end
         
         if stim_chosen == 1 
-              p_low_safe(t)         = 1;
+              p_low_safe(t)        = 1;
         elseif stim_chosen == 2
-              p_low_risky(t)        = 1;
+              p_low_risky(t)       = 1;
         elseif stim_chosen == 3
-              p_high_safe(t)        = 1;
+              p_high_safe(t)       = 1;
         elseif stim_chosen == 4 
-              p_high_risky(t)       = 1;
+              p_high_risky(t)      = 1;
         end
         
         R_t(t) = R{stim_chosen}(1);
         R{stim_chosen}(1) = []; %removes value so cannot be reused
 
+        % learning rates; different for positive and negative prediction
+        % errors
+
         % updating the action values annd learning rates 
 
         delta = R_t(t) - Qt(stim_chosen); % current trial prediction error
-        delta_spread = abs(delta) - St(stim_chosen); 
 
-%         % udpdate previous action value: Q_t+1 = Q_t + a_Q * d
-        Qt(stim_chosen) = Qt(stim_chosen) + alpha_q * delta; 
-        St(stim_chosen) = St(stim_chosen) + alpha_s * delta_spread;
+        % check whether delta is more or less than 0 to determine which
+        % learning rate to use 
+
+        if delta > 0
+            alpha2use = alpha_p;
+        else 
+            alpha2use = alpha_n;
+        end
         
-        % update previous spread value
-%         St = St - S0;
-
-%         Qt(t) = Qt(stim_chosen(t-1)) + alpha_q * (R_t(t) - Qt(stim_chosen(t-1)));
-%         St(t) = St(stim_chosen(t-1)) + alpha_s * (abs(R_t(t)-Qt(stim_chosen(t-1)))) - St(stim_chosen(t-1));
+%       % udpdate previous action value: Q_t+1 = Q_t + a_Q * d
+        Qt(stim_chosen) = Qt(stim_chosen) + alpha2use * delta; 
 
         % store the upated Q value
         Q_all(stim_chosen, t) = Qt(stim_chosen);
         % store the updated S value
-        S_all(stim_chosen, t) = St(stim_chosen);
+    
         % store stimulus specific p value
         % store risky choices from the both-high and both-low conditions
         if stimuliShown(t) == 12 || stimuliShown(t) == 21 ||...
             stimuliShown(t) == 34 || stimuliShown(t) == 43
             %both-low and both-high conditions indices
             pt(stim_chosen, t)   = p(1, t);
-        end
-        
-
+        end        
                
     end
 
     stimuliShown_i1(i, :) = stim1';
     stimuliShown_i2(i, :) = stim2';
 
+    % total times each of the four stimuli were shown on this iteration
     for istim = 1:4
-        Q_out{istim}(i, :)   = Q_all(istim, :);
-        S_out{istim}(i, :)   = S_all(istim, :);
-        P_out{istim}(i, :)   = pt(istim, :);
-        p_low_safe_out(i, :) = p_low_safe;
+        tmp_stotal1(i, istim)   = sum(stimuliShown_i1(i, :) == istim);
+        tmp_stotal2(i, istim)   = sum(stimuliShown_i2(i, :) == istim);
+        Q_out{istim}(i, :)      = Q_all(istim, :);
+        P_out{istim}(i, :)      = pt(istim, :);
     end
 
      p_low_safe_out(i, :) = p_low_safe;
@@ -122,29 +118,20 @@ for i = 1: iters
      p_high_safe_out(i, :) = p_high_safe;
      p_high_risky_out(i, :) = p_high_risky;
 
+    % generate risk preferences per iteration 
+
+    stimTotal_all(i, :) = tmp_stotal1(i, :) + tmp_stotal2(i, :);
+
+    %total times each stimulus was CHOSEN during this iteration 
+    % irrespective of trial number at this stage
+    p_risky_out(i, 1) = sum(p_low_safe_out(i, :) == 1)./stimTotal_all(i, 1);
+    p_risky_out(i, 2) = sum(p_low_risky_out(i, :) ==1)./stimTotal_all(i, 2);
+    p_risky_out(i, 3) = sum(p_high_safe_out(i, :) ==1)./stimTotal_all(i, 3);
+    p_risky_out(i, 4) = sum(p_high_risky_out(i, :) ==1)./stimTotal_all(i, 4);
+
+    risky_HH(i)       = p_risky_out(i, 4);
+    risky_LL(i)       = p_risky_out(i, 2);
 
 end
-
-% calculcate risk preferences
-% across trial numbers, how many times each stimulus was shown
-% at time point (t)
-for it = 1: 120
-
-    for istim = 1:4
-
-
-        tmp_stotal1(it, istim) = sum(stimuliShown_i1(:, t) == istim);
-        tmp_stotal2(it, istim) = sum(stimuliShown_i2(:, t) == istim);
-
-    end
-end
-
-stimTotal_all = tmp_stotal1(1, :) + tmp_stotal2(1, :);
-
-%total times each stimulus was CHOSEN at time point (t)
-p_risky_out(:, 1) = sum(p_low_safe_out ==1, 1)./stimTotal_all(1);
-p_risky_out(:, 2) = sum(p_low_risky_out ==1, 1)./stimTotal_all(2);
-p_risky_out(:, 3) = sum(p_high_safe_out ==1, 1)./stimTotal_all(3);
-p_risky_out(:, 4) = sum(p_high_risky_out ==1, 1)./stimTotal_all(4);
 
 end

@@ -1,4 +1,4 @@
-function PEIRS_paramExplor_GUI
+function posNegRates_paramExplor_GUI
 
 clc 
 clear
@@ -15,6 +15,7 @@ mainFig.Position = [185.8000 172.2000 1.3296e+03 453.6000];
 ax_valueRate  = uiaxes(mainFig, 'position', [420 250 400 200]);
 ax_spreadRate = uiaxes(mainFig, 'position', [420 30 400 200]);
 ax_probRisky  = uiaxes(mainFig, 'position', [860 30 400 400]);
+
 
 CondPanel      = uipanel(mainFig, 'title', 'Conditions', 'FontSize', 14,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
@@ -80,15 +81,6 @@ plotSim = uicontrol(mainFig, 'Style', 'pushbutton', 'string', 'Simulate',...
     'FontSize', 16, 'FontWeight', 'bold', 'FontName', 'times', 'position', [90 20 250 50]);
 plotSim.Callback = @plotPEIRS_simulated;
 
-%-------------------------------------------------------------------------------
-%-----------------------------------------------------------------------------------
-
-%-------------------------------------------------------------------------------
-%-----------------------------------------------------------------------------------
-%------ PUSH BUTTON AND SUBSEQUENT FUNCTIONS------------------------------
-%-------------------------------------------------------------------------------
-%-----------------------------------------------------------------------------------
-
 %initialise variables to be input into the plotting function
 Q0 = []; S0 = []; alpha_q = []; alpha_s = [];
 beta = []; omega = []; distType = []; condType = [];
@@ -149,18 +141,18 @@ inp = [];
         title('\bf \fontsize{12} Change in Spread over Trials');
         set(gca, 'FontName', 'times');
 
-        
+
         
         axes(ax_probRisky);
         % low-risky
-        plot(nanmean(P_out{2}), 'color', lowcol, 'lineStyle', '-', 'linew', 1.2);
+        plot(p_risky_out(:, 2), 'color', lowcol, 'lineStyle', '-', 'linew', 1.2);
         hold on 
-        smoothLow = smoothdata(nanmean(P_out{2}), 'movmean', 24);
+        smoothLow = smoothdata(p_risky_out(:, 2), 'movmean', 24);
         plot(smoothLow, 'color', lowcol, 'lineStyle', '-', 'linew', 3);
         % high-risk
-        plot(nanmean(P_out{4}), 'color', highcol, 'lineStyle', '-', 'linew', 1.2);
+        plot(p_risky_out(:, 4), 'color', highcol, 'lineStyle', '-', 'linew', 1.2);
         hold on
-        smoothHigh = smoothdata(nanmean(P_out{4}), 'movmean', 24);
+        smoothHigh = smoothdata(p_risky_out(:, 4), 'movmean', 24);
         plot(smoothHigh, 'color', highcol, 'lineStyle', '-', 'linew', 3);
         ylabel('P(Risky)');
         xlabel('No. Trials');
@@ -169,7 +161,7 @@ inp = [];
         hold on 
         plot([0 120], [0.5 0.5], 'k--');
         legend({'Low-Risky (Sim.)', 'Low-Risky (Smoothed)', 'High-Risky (Sim.)',...
-            'High-Risky (Smoothed)', ''});
+            'High-Risky (Smoothed)', ''},'location', 'best');
 
             
       

@@ -1,4 +1,4 @@
-function PEIRS_paramExplor_GUI
+function posNegRates_paramExplor_GUI
 
 clc 
 clear
@@ -6,7 +6,7 @@ close all hidden
 
 mainFig = figure;
 mainFig.Name = 'mainWindow';
-mainFig.Position = [185.8000 172.2000 1.3296e+03 453.6000];
+mainFig.Position = [153 81.8000 1.3368e+03 591.2000];
 
 modelFig = figure;
 modelFig.Name = 'modelFig';
@@ -15,103 +15,97 @@ modelFig.Position =[419.4000 180.2000 372.8000 355.2000];
 accFig = figure;
 accFig.Name = 'accWindow';
 accFig.Position =  [23.4000 47.4000 564 712];
-
-
 %----------------------------------------------------------------------------
 % GENERATE BASIC GRAPHICS FOR USER INPUT AND THE AXES FOR PLOTS 
 %------------------------------------------------------------------------------------
 % create axes for simulated average reward and spread to be plotted onto
-ax_valueRate  = uiaxes(mainFig, 'position', [420 250 400 200]);
-ax_spreadRate = uiaxes(mainFig, 'position', [420 30 400 200]);
-ax_deltaStim  = uiaxes(mainFig, 'position', [850 250 400 200]);
-ax_probRisky = uiaxes(mainFig, 'position', [850 30 400 200]);
+ax_valueRate  = uiaxes(mainFig, 'position', [420 125 400 400]);
+ax_probRisky  = uiaxes(mainFig, 'position', [860 125 400 400]);
 ax_model = uiaxes(modelFig, 'Position', [30 30 300 300]);
 ax_gauss    = uiaxes(accFig, 'Position', [30 375 300 300]);
 ax_bimodal  = uiaxes(accFig, 'Position', [30 30 300 300]);
 
 CondPanel      = uipanel(mainFig, 'title', 'Conditions', 'FontSize', 14,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
-    'TitlePosition', 'centertop', 'Position', [.02 .77 .125 .2]);
+    'TitlePosition', 'centertop', 'Position', [.02 .82 .125 .15]);
 
 DistPanel       = uipanel(mainFig, 'title', 'Rewards', 'FontSize', 14,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
-    'TitlePosition', 'centertop', 'Position', [.16 .77 .125 .2]);
+    'TitlePosition', 'centertop', 'Position', [.16 .82 .125 .15]);
+
+% enter filename to save the output of the simulation > at this stage this
+% is manually input as we are exploring different elements 
+
+fileNamePanel   = uipanel(mainFig, 'title', 'Filename', 'FontSize', 14,...
+    'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
+    'TitlePosition', 'centertop', 'Position', [.02 .68 .27 .12]);
 
 % create dropdown menu for conditions to simulate selection 
 
-condSel         = uicontrol(mainFig, 'Style', 'popupmenu', 'position', [50 385 120 20]);
+condSel         = uicontrol(mainFig, 'Style', 'popupmenu', 'position', [50 520 120 20]);
 condSel.String = {'All Conditions', 'Risk Preference'};
 condSel.FontSize = 12;
 condSel.FontName = 'times';
-condSel.Callback = @plotPEIRS_simulated;
+condSel.Callback = @plot_posNegRates_simulated;
 
-DistSel         = uicontrol(mainFig, 'Style', 'popupmenu', 'position', [230 385 130 20]);
+DistSel         = uicontrol(mainFig, 'Style', 'popupmenu', 'position', [230 520 130 20]);
 DistSel.String = {'Gaussian', 'Bimodal', 'Compare'};
 DistSel.FontSize = 12;
 DistSel.FontName = 'times';
-DistSel.Callback = @plotPEIRS_simulated;
+DistSel.Callback = @plot_posNegRates_simulated;
 
+FilenameSel          = uicontrol(mainFig, 'Style', 'edit', 'position', [112 417 200 30]);
+FilenameSel.FontSize = 12;
+FilenameSel.FontName = 'times';
 
 paramPanel      = uipanel(mainFig, 'title', 'Set Parameters', 'FontSize', 14,...
-    'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white', 'Position', [.02 .18 .27 .55]);
+    'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white', 'Position', [.02 .060 .27 .55]);
 
 %%%% Starting Paramaters
 varPanel      = uipanel(mainFig, 'title', 'Initial Parameters', 'FontSize', 12,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
-    'TitlePosition', 'centertop',  'Position', [.032 .53 .25 .15]);
+    'TitlePosition', 'centertop',  'Position', [.032 .40 .25 .15]);
 text_qstart   = uicontrol(mainFig, 'Style', 'Text', 'string', 'Q0',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [55 250 100 40]);
-prompt_qstart = uicontrol(mainFig, 'Style', 'popupmenu', 'position', [80 255 50 20]);
+    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [160 260 100 40]);
+prompt_qstart = uicontrol(mainFig, 'Style', 'popupmenu', 'position', [190 265 50 20]);
 prompt_qstart.String = {'50'};
-text_sstart   = uicontrol(mainFig, 'Style', 'Text', 'string', 'S0',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [260 250 100 40]);
-prompt_sstart = uicontrol(mainFig, 'Style', 'edit', 'position', [285 255 50 20]);
+
 %%%% Learning rate parameters
 lrPanel      = uipanel(mainFig, 'title', 'Learing Rates:', 'FontSize', 12,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
-    'TitlePosition', 'centertop',  'Position', [.032 .37 .25 .15]);
-text_aq   = uicontrol(mainFig, 'Style', 'Text', 'string', 'Q',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [55 178 100 40]);
-prompt_aq = uicontrol(mainFig, 'Style', 'edit', 'position', [80 184 50 20]);
-text_as   = uicontrol(mainFig, 'Style', 'Text', 'string', 'S',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [260 178 100 40]);
-prompt_as = uicontrol(mainFig, 'Style', 'edit', 'position', [285 184 50 20]);
+    'TitlePosition', 'centertop',  'Position', [.032 .24 .25 .15]);
+text_ap   = uicontrol(mainFig, 'Style', 'Text', 'string', '+ve',...
+    'FontSize', 9, 'FontWeight', 'bold', 'FontName', 'times', 'position', [55 160 100 40]);
+prompt_ap = uicontrol(mainFig, 'Style', 'edit', 'position', [80 165 50 20]);
+text_an   = uicontrol(mainFig, 'Style', 'Text', 'string', '-ve',...
+    'FontSize', 9, 'FontWeight', 'bold', 'FontName', 'times', 'position', [260 160 100 40]);
+prompt_an = uicontrol(mainFig, 'Style', 'edit', 'position', [285 165 50 20]);
 %%%% Choice Parameters
 smPanel      = uipanel(mainFig, 'title', 'softmax:', 'FontSize', 12,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
-    'TitlePosition', 'centertop',  'Position', [.032 .21 .25 .15]);
+    'TitlePosition', 'centertop',  'Position', [.032 .082 .25 .15]);
 text_beta  = uicontrol(mainFig, 'Style', 'Text', 'string', 'Beta',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [55 108 100 40]);
-prompt_beta = uicontrol(mainFig, 'Style', 'edit', 'FontName', 'times', 'position', [80 112 50 20]);
-text_omega   = uicontrol(mainFig, 'Style', 'Text', 'string', 'Omega',...
-    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [260 108 100 40]);
-prompt_omega = uicontrol(mainFig, 'Style', 'edit', 'position', [285 112 50 20]);
+    'FontSize', 8, 'FontWeight', 'bold', 'FontName', 'times', 'position', [160 65 100 40]);
+prompt_beta = uicontrol(mainFig, 'Style', 'edit', 'FontName', 'times', 'position', [185 72 50 20]);
 
 % button to be clicked and generate plot
  
 plotSim = uicontrol(mainFig, 'Style', 'pushbutton', 'string', 'Simulate',...
-    'FontSize', 16, 'FontWeight', 'bold', 'FontName', 'times', 'position', [90 20 250 50]);
-plotSim.Callback = @plotPEIRS_simulated;
+    'FontSize', 16, 'FontWeight', 'bold', 'FontName', 'times', 'position', [1050 20 250 50]);
 
-%-------------------------------------------------------------------------------
-%-----------------------------------------------------------------------------------
-
-%-------------------------------------------------------------------------------
-%-----------------------------------------------------------------------------------
-%------ PUSH BUTTON AND SUBSEQUENT FUNCTIONS------------------------------
-%-------------------------------------------------------------------------------
-%-----------------------------------------------------------------------------------
+plotSim.Callback = @plot_posNegRates_simulated;
+% FilenameSel.Callback = @plot_posNegRates_simulated;
 
 %initialise variables to be input into the plotting function
-Q0 = []; S0 = []; alpha_q = []; alpha_s = [];
-beta = []; omega = []; distType = []; condType = [];
-filename = []; filename_1 = []; filename_2 = [];
-data2save = []; deltaStim = []; 
-inp = []; accCol =[];
+Q0 = []; alpha_p = []; alpha_n = [];
+beta = []; distType = []; condType = []; 
+filename = []; filename_1 = []; filename_2 =[];
+inp = [];
 
-    function plotPEIRS_simulated(src, event)
+    function plot_posNegRates_simulated(src, event)
 
 
+        
         if DistSel.Value == 1 %gaussian
             distType = 1;
             hold_axes = 0;
@@ -130,6 +124,7 @@ inp = []; accCol =[];
             lowcol = {[0.83 0.71 0.98], [0.58 0.99 0.56]};
             highcol = {[0.62 0.35 0.99], [0.19 0.62 0.14]};
             C = [{colormap(cbrewer2('BuPu', 40))}, {colormap(cbrewer2('YlGn', 40))}];
+ 
         end
 
         if condSel.Value == 1
@@ -141,20 +136,18 @@ inp = []; accCol =[];
         Q0 = str2num(prompt_qstart.String{1});
         cla(ax_valueRate);
         cla(ax_probRisky);
-        cla(ax_spreadRate);
-        cla(ax_deltaStim);
         cla(ax_gauss);
         cla(ax_bimodal);
         cla(ax_model);
 
         for idist = 1: length(distType)
 
-            callback_simParams;
+                callbackParams_posNegRates;
+                filename = [filename '_' DistSel.String{distType(idist)} '.mat'];
+
+                [Q_out, P_out, p_risky_out, prop_accuracy] = simulatePosNegRates_allCond(Q0, alpha_p,...
+                alpha_n, beta, distType(idist), condType);
     
-            [Q_out, S_out, P_out, p_risky_out, deltaStim, prop_accuracy] = simulatePEIRS_allCond(Q0, S0, alpha_q,...
-                alpha_s, beta, omega, distType(idist), condType);
-
-
             axes(ax_valueRate);
             plot(nanmean(Q_out{1}), 'linestyle', '--', 'color', lowcol{idist}, 'LineWidth', 2);
             hold on
@@ -163,37 +156,14 @@ inp = []; accCol =[];
             plot(nanmean(Q_out{3}), 'linestyle', '--', 'color', highcol{idist}, 'LineWidth', 2);
             hold on
             plot(nanmean(Q_out{4}), 'linestyle', '-', 'color', highcol{idist}, 'LineWidth', 2);
-            hold on 
+            hold on
             plot([0 120], [60 60], 'k--');
             hold on
-            plot([0 120], [40 40], 'k--');        
+            plot([0 120], [40 40], 'k--');
             legend({'Low-Safe', 'Low-Risky', 'High-Safe', 'High-Risky'});
             xlabel('No. Trials');
             ylabel({'Simulated Average',  'Value (Learned)'});
             title('\bf \fontsize{12} Change in Value over Trials');
-            set(gca, 'FontName', 'times');
-    
-            axes(ax_spreadRate);
-            plot(nanmean(S_out{1}), 'linestyle', '--', 'color', lowcol{idist}, 'LineWidth', 2);
-            hold on
-            plot(nanmean(S_out{2}), 'linestyle', '-', 'color', lowcol{idist}, 'LineWidth', 2);
-            hold on
-            plot(nanmean(S_out{3}), 'linestyle', '--', 'color', highcol{idist}, 'LineWidth', 2);
-            hold on
-            plot(nanmean(S_out{4}), 'linestyle', '-', 'color', highcol{idist}, 'LineWidth', 2);
-            legend({'Low-Safe', 'Low-Risky', 'High-Safe', 'High-Risky'});
-            xlabel('No. Trials');
-            ylabel({'Simulated Average',  'Spread (Learned)'});
-            title('\bf \fontsize{12} Change in Spread over Trials');
-            set(gca, 'FontName', 'times');
-    
-            axes(ax_deltaStim);
-            plot(deltaStim, 'Color', highcol{idist}, 'lineStyle', '-', 'linew', 1.2);
-            hold on 
-            plot([1 120], [0 0], 'k--');
-            xlabel('No. Trials');
-            ylabel({'Stimulus Prediction Error'});
-            title('\bf \fontsize{12} \delta Stimulus');
             set(gca, 'FontName', 'times');
     
             axes(ax_probRisky);
@@ -215,7 +185,8 @@ inp = []; accCol =[];
             plot([0 120], [0.5 0.5], 'k--');
             legend({'Low-Risky (Sim.)', 'Low-Risky (Smoothed)', 'High-Risky (Sim.)',...
                 'High-Risky (Smoothed)', ''},'location', 'best');
-
+    
+            
             % plot models on same axes for poster 
             bin = [1:24:120];
             binSize = 24;
@@ -281,42 +252,37 @@ inp = []; accCol =[];
           
             set(gca, 'FontName', 'Arial');
             set(gca, 'FontSize', 14);
-
-            data2save.Q0        = Q0;
-            data2save.S0        = S0;
-            data2save.alpha_q   = alpha_q;
-            data2save.alpha_s   = alpha_s;
+  
+          
+            data2save = [];
+            data2save.alpha_pos = alpha_p;
+            data2save.alpha_neg = alpha_n;
             data2save.beta      = beta;
-            data2save.omega     = omega;
             data2save.s_Q(1, :) = nanstd(Q_out{1});
             data2save.s_Q(2, :) = nanstd(Q_out{2});
             data2save.s_Q(3, :) = nanstd(Q_out{3});
             data2save.s_Q(4, :) = nanstd(Q_out{4});
-            data2save.Q{1}      = (Q_out{1});
-            data2save.Q{2}      = (Q_out{2});
-            data2save.Q{3}      = (Q_out{3});
-            data2save.Q{4}      = (Q_out{4});
+            data2save.Q(1, :)   = nanmean(Q_out{1});
+            data2save.Q(2, :)   = nanmean(Q_out{2});
+            data2save.Q(3, :)   = nanmean(Q_out{3});
+            data2save.Q(4, :)   = nanmean(Q_out{4});
             data2save.risk_low  = p_risky_out(:, 2);
             data2save.risk_high = p_risky_out(:, 4);
-    
-            filename = [DistSel.String{DistSel.Value} '_S0_' num2str(S0) '_aq_' num2str(alpha_q) '_as_' num2str(alpha_s) '.mat'];
-            cd('C:\Users\jf22662\OneDrive - University of Bristol\Documents\GitHub\riskPreference_GUI_Developement\saveFits\PEIRS');
+            
+            cd('C:\Users\jf22662\OneDrive - University of Bristol\Documents\GitHub\riskPreference_GUI_Developement\saveFits\posNeg');
             save(filename, 'data2save');
-
+            
+        end
             cd('C:\Users\jf22662\OneDrive - University of Bristol\Documents\riskAversion\SBDM_poster');
             figure(2);
             gcf;
-            filename_1 = ['poster_simulated_riskPreferences'];
+            filename_1 = ['posNeg_poster_simulated_riskPreferences'];
             print(figure(2), filename_1, '-dpdf');
             figure(3);
             gcf;
-            filename_2 = ['poster_simulated_accuracy'];
+            filename_2 = ['posNeg_poster_simulated_accuracy'];
             print(figure(3), filename_2, '-dpdf');
 
-
-        
-        end
-      
-    end
+   end
 
 end
