@@ -1,12 +1,16 @@
 function exploration_paramExplor_GUI
 
 clc 
-clear
+clear all
 close all hidden
 
 mainFig = figure;
 mainFig.Name = 'mainWindow';
 mainFig.Position = [185.8000 1.8000 867.2000 780.8000];
+
+modelFig = figure;
+modelFig.Name = 'modelFig';
+modelFig.Position =[419.4000 180.2000 372.8000 355.2000];
 
 %----------------------------------------------------------------------------
 % GENERATE BASIC GRAPHICS FOR USER INPUT AND THE AXES FOR PLOTS 
@@ -15,6 +19,7 @@ mainFig.Position = [185.8000 1.8000 867.2000 780.8000];
 ax_probRisky = uiaxes(mainFig, 'position', [300 540 500 220]);
 ax_ucbRate = uiaxes(mainFig, 'Position', [300 280 500 220]);
 ax_valueRate  = uiaxes(mainFig, 'position', [300 30 500 220]);
+ax_model = uiaxes(modelFig, 'Position', [30 30 300 300]);
 
 DistPanel       = uipanel(mainFig, 'title', 'Rewards', 'FontSize', 14,...
     'FontName', 'Times', 'FontWeight', 'Bold', 'Background', 'white',...
@@ -117,7 +122,7 @@ inp = []; accCol =[];
         cla(ax_ucbRate);
         cla(ax_probRisky);
         cla(ax_valueRate);
-
+        cla(ax_model);
         for idist = 1: length(distType)
 
             callbackSims_exploration;
@@ -179,6 +184,76 @@ inp = []; accCol =[];
             ylabel({'Simulated Average',  'Value (Learned)'});
             title('\bf \fontsize{12} Change in Value over Trials');
             set(gca, 'FontName', 'times');
+
+            % plot models on same axes for poster 
+            bin = [1:24:120];
+            binSize = 24;
+            for ibin = 1: length(bin)
+
+                 
+                mean_low{idist}(ibin) = nanmean(p_risky_out((bin(ibin): (bin(ibin) + binSize -1)), 2));
+                sem_low{idist}(ibin) = nanstd(p_risky_out((bin(ibin): (bin(ibin) + binSize -1)), 2))...
+                    ./sqrt(length(p_risky_out((bin(ibin): (bin(ibin) + binSize -1)), 2)));
+
+                mean_high{idist}(ibin) = nanmean(p_risky_out((bin(ibin): (bin(ibin) + binSize -1)), 4));
+                sem_high{idist}(ibin) = nanstd(p_risky_out((bin(ibin): (bin(ibin) + binSize -1)), 4))...
+                    ./sqrt(length(p_risky_out((bin(ibin): (bin(ibin) + binSize -1)), 4)));
+            end
+    
+            axes(ax_model);
+            box on
+            hold on 
+            errorbar(mean_high{idist}, sem_high{idist}, 'color', highcol{idist}, 'linew', 1.5);
+            errorbar(mean_low{idist}, sem_low{idist}, 'color', lowcol{idist}, 'linew', 1.5); 
+            set(gca, 'FontSize', 14);
+            xlim([0 6]);          
+            ylim([0 1]);
+            hold on
+            plot([0 6], [0.5 0.5], 'k--');
+            
+            set(gca, 'FontName', 'Arial');
+            cd('C:\Users\jf22662\OneDrive - University of Bristol\Documents\riskAversion\modelbasedneurosci_2023');
+            figure(2);
+            gcf;
+            filename_1 = ['poster_simulated_riskPreferences_UCB'];
+            print(figure(2), filename_1, '-dpdf');
+%             if distType(idist) == 1  
+%                 axes(ax_gauss);
+%                 box on
+%             else 
+%                 axes(ax_bimodal);
+%                 box on
+%             end
+%             hold on
+%             for iplot = 1:4
+%                 for ibin = 1: length(bin)
+%                      
+%                     acc_mean{idist}(iplot, ibin) = nanmean(prop_accuracy(iplot, (bin(ibin): bin(ibin) + binSize -1)));
+%                     acc_sem{idist}(iplot, ibin)  = nanstd(prop_accuracy(iplot, (bin(ibin): bin(ibin) + binSize -1)))...
+%                         ./sqrt(length(prop_accuracy(iplot, (bin(ibin): bin(ibin) + binSize -1))));
+%                 end
+%                 errorbar(acc_mean{idist}(iplot, :) , acc_sem{idist}(iplot, :), 'color', C{idist}(iplot*10, :), 'linew', 1.5);
+% 
+%             end
+%             hold on
+%             xlim([0 6]);
+%             if distType(idist) == 1
+%                 ylim([0.4 1]);
+%             else 
+%                 ylim([0 1]);
+%             end
+%             set(gca, 'XTick', [1:5]);
+%             hold on
+%             plot([0 6], [0.5 0.5], 'k--');
+%             %             plot([1 120], [0.5 0.5], 'k--');
+%             if distType(idist) == 1  
+%                 legend({'LLSafe-HHRisky', 'LLSafe-HHSafe', 'LLRisky-HHSafe', 'LLRisky-HHRisky'}, 'position', [0.7 0.6 0.2 0.2]);
+%             else 
+%                 legend({'LLSafe-HHRisky', 'LLSafe-HHSafe', 'LLRisky-HHSafe', 'LLRisky-HHRisky'}, 'position', [0.7 0.1 0.2 0.2]);
+%             end
+%           
+%             set(gca, 'FontName', 'Arial');
+%             set(gca, 'FontSize', 14);
     
 
         end

@@ -171,19 +171,21 @@ for it = 1: 120
 
     for istim = 1:4
 
-        tmp_stotal1(1, istim) = sum(stim1_total(:, t) == istim);
-        tmp_stotal2(1, istim) = sum(stim2_total(:, t) == istim);
+        tmp_stotal1(istim, it) = sum(stim1_total(:, it) == istim);
+        tmp_stotal2(istim, it) = sum(stim2_total(:, it) == istim);
 
     end
+ 
+    stimTotal_all(:, it) = tmp_stotal1(:, it) + tmp_stotal2(:, it);
 end
 
-stimTotal_all = tmp_stotal1(1, :) + tmp_stotal2(1, :);
+% stimTotal_all(it, istim) = tmp_stotal1(1, :) + tmp_stotal2(1, :);
 
 %total times each stimulus was CHOSEN at time point (t)
-p_risky_out(:, 1) = sum(p_low_safe_out ==1, 1)./stimTotal_all(1);
-p_risky_out(:, 2) = sum(p_low_risky_out ==1, 1)./stimTotal_all(2);
-p_risky_out(:, 3) = sum(p_high_safe_out ==1, 1)./stimTotal_all(3);
-p_risky_out(:, 4) = sum(p_high_risky_out ==1, 1)./stimTotal_all(4);
+p_risky_out(:, 1) = sum(p_low_safe_out ==1, 1)./stimTotal_all(1, :);
+p_risky_out(:, 2) = sum(p_low_risky_out ==1, 1)./stimTotal_all(2, :);
+p_risky_out(:, 3) = sum(p_high_safe_out ==1, 1)./stimTotal_all(3, :);
+p_risky_out(:, 4) = sum(p_high_risky_out ==1, 1)./stimTotal_all(4, :);
 
 
 end

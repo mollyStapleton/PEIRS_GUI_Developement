@@ -303,10 +303,10 @@ inp = []; accCol =[];
             cd('C:\Users\jf22662\OneDrive - University of Bristol\Documents\GitHub\riskPreference_GUI_Developement\saveFits\PEIRS');
             save(filename, 'data2save');
 
-            cd('C:\Users\jf22662\OneDrive - University of Bristol\Documents\riskAversion\SBDM_poster');
+            cd('C:\Users\jf22662\OneDrive - University of Bristol\Documents\riskAversion\modelbasedneurosci_2023');
             figure(2);
             gcf;
-            filename_1 = ['poster_simulated_riskPreferences'];
+            filename_1 = ['poster_simulated_riskPreferences_PEIRS'];
             print(figure(2), filename_1, '-dpdf');
             figure(3);
             gcf;
