@@ -24,6 +24,8 @@ for i = 1: iters
     pt                  = NaN(4, 120); %return the probability for each stimulus
     Q_all               = NaN(4, 120); %stored updated Q for plotting
     V_all               = NaN(4, 120); 
+    stimuliShown_i1     = NaN(1, 120);
+    stimuliShown_i2     = NaN(1, 120);
     % generate vector of 0s to store choices to each stimulus as a binary
     % matrix
 
@@ -57,17 +59,6 @@ for i = 1: iters
 
         nCounts(stim_chosen(i, t)) = nCounts(stim_chosen(i, t))+1;
 
-        %store whether the stimulus was explored
-        if stim_chosen(i, t) == 1
-            p_low_safe(t)         = 1;
-        elseif stim_chosen(i, t) == 2
-            p_low_risky(t)        = 1;
-        elseif stim_chosen(i, t) == 3
-            p_high_safe(t)        = 1;
-        elseif stim_chosen(i, t) == 4
-            p_high_risky(t)       = 1;
-        end
-
         R_t(t) = R{stim_chosen(i, t)}(1);
         R{stim_chosen(i, t)}(1) = []; %removes value so cannot be reused
 
@@ -87,14 +78,27 @@ for i = 1: iters
             stimuliShown(i, t) == 34 || stimuliShown(i, t) == 43
             %both-low and both-high conditions indices
             pt(stim_chosen(i, t), t)   = p(1, t);
+
+             %store whether the stimulus was explored
+            if stim_chosen(i, t) == 1
+                p_low_safe(t)         = 1;
+            elseif stim_chosen(i, t) == 2
+                p_low_risky(t)        = 1;
+            elseif stim_chosen(i, t) == 3
+                p_high_safe(t)        = 1;
+            elseif stim_chosen(i, t) == 4
+                p_high_risky(t)       = 1;
+            end
+
+            % only start to sum up stimulus presentations for LL and HH
+            % conditions 
+            stimuliShown_i1(:, t) = stim1(t)';
+            stimuliShown_i2(:, t) = stim2(t)';
+
         end        
              
 
     end
-
-
-    stimuliShown_i1(i, :) = stim1';
-    stimuliShown_i2(i, :) = stim2';
 
     for istim = 1:4
         Q_out{istim}(i, :)   = Q_all(istim, :);
@@ -107,6 +111,8 @@ for i = 1: iters
     p_high_safe_out(i, :) = p_high_safe;
     p_high_risky_out(i, :) = p_high_risky;
 
+    stim1_total(i, :) = stimuliShown_i1;
+    stim2_total(i, :) = stimuliShown_i2;
 end
 
 % calculcate risk preferences
